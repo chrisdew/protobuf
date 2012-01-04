@@ -1,0 +1,16 @@
+{ "name" : "protobuf",
+  "version" : "0.3.0",
+  "description" : "Protocol Buffers for NodeJS",
+  "author": {
+    "Matthias Ernst": "mernst@google.com"
+  },
+  "main": "./build/default/protobuf_for_node",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chrisdew/protobuf.git"
+  },
+  "scripts": { 
+    "preinstall": "PROTOBUF=/usr/lib node-waf configure",
+    "install": "node-waf clean build" 
+  }
+}
