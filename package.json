@@ -10,7 +10,6 @@
     "url": "git://github.com/chrisdew/protobuf.git"
   },
   "scripts": { 
-    "preinstall": "PROTOBUF=/usr/lib node-waf configure",
-    "install": "node-waf clean build" 
+    "install": "PROTOBUF=/usr/local/lib node-waf configure clean build" 
   }
 }
