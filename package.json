@@ -4,12 +4,12 @@
   "author": {
     "Matthias Ernst": "mernst@google.com"
   },
-  "main": "./build/default/protobuf_for_node",
+  "main": "./build/Release/protobuf_for_node",
   "repository": {
     "type": "git",
     "url": "git://github.com/chrisdew/protobuf.git"
   },
   "scripts": { 
-    "install": "PROTOBUF=/usr/local/lib node-waf configure clean build" 
+    "install": "PROTOBUF=/usr/local/lib node-waf configure clean build && ldconfig `pwd`/build/Release/" 
   }
 }

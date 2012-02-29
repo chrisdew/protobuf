@@ -25,7 +25,7 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/service.h>
 
-#include <eio.h>
+#include <node/uv-private/eio.h>
 #include <node_buffer.h>
 #include <node_object_wrap.h>
 
@@ -590,14 +590,14 @@ namespace protobuf_for_node {
       static ev_async ev_done;
 
       // in some thread:
-      static int Run(eio_req* req) {
+      static void Run(eio_req* req) {
         AsyncInvocation* self = static_cast<AsyncInvocation*>(req->data);
         self->service_->service_->CallMethod(self->method_,
                                              NULL,
                                              self->request_,
                                              self->response_,
                                              google::protobuf::NewCallback(&Done, self));
-        return 0;
+        //return 0;
       }
 
       // in some thread:
