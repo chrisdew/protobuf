@@ -1,15 +1,11 @@
-This is a fork of http://code.google.com/p/protobuf-for-node/
+This is a fork of https://github.com/chrisdew/protobuf
 
-My intention is just to package it up nicely for NPM and to fix some bugs.
-
-I also intend to make it work with the NodeJS 0.6.x series.
-
-
+It was forked to add support for nodejs 0.6.x using code from https://github.com/pzgz/protobuf-for-node
 
 Prerequisites:
 --------------
 
-NodeJS v0.4.X
+NodeJS v0.6.X
 npm
 
 
@@ -22,18 +18,7 @@ To install on Ubuntu:
 4. ./configure && make && sudo make install
 5. cd
 6. npm install protobuf
-7. echo "/home/chris/node_modules/protobuf/build/default/" | sudo tee /etc/ld.so.conf.d/protobuf.conf
-   (replace /home/chris/node_modules with wherever you installed the module)
-8. sudo ldconfig
-9. run node, try "require('protobuf');" - you should see: { Schema: [Function: Schema] }
+7. run node, try "require('protobuf');" - you should see: { Schema: [Function: Schema] }
 
-
-As seen from the instructions above, this is my first attempt at packaging a slightly complex C++ module for NPM.
-
-If you can help me simplify these instructions, please submit a patch.
-
-
-Good luck,
-
-Chris.
+Please report any issues or bugs at https://github.com/englercj/protobuf/issues
 
