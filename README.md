@@ -12,13 +12,16 @@ npm
 To install on Ubuntu:
 ---------------------
 
-1. wget http://protobuf.googlecode.com/files/protobuf-2.4.1.tar.gz
-2. tar -xzvf protobuf-2.4.1.tar.gz
-3. cd protobuf-2.4.1/
-4. ./configure && make && sudo make install
-5. cd
-6. npm install protobuf
-7. run node, try "require('protobuf');" - you should see: { Schema: [Function: Schema] }
+    wget http://protobuf.googlecode.com/files/protobuf-2.4.1.tar.gz
+    tar -xzvf protobuf-2.4.1.tar.gz
+    cd protobuf-2.4.1/
+    ./configure && make && sudo make install
+    cd ..
+    npm install protobuf
+    node
+    require('protobuf');
+
+The final line should output `{ Schema: [Function: Schema] }`.
 
 Please report any issues or bugs at https://github.com/englercj/protobuf/issues
 
