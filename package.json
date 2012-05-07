@@ -11,6 +11,7 @@
     "url": "git://github.com/chrisdew/protobuf.git"
   },
   "scripts": { 
-    "install": "PROTOBUF=/usr/local/lib node-waf configure clean build" 
+    "install": "PROTOBUF=/usr/local/lib node-waf configure clean build",
+    "test": "node test/unittest.js"
   }
 }
