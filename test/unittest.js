@@ -1,7 +1,7 @@
 var assert = require('assert'),
     puts = require('util').puts,
     read = require('fs').readFileSync,
-    Schema = require('protobuf_for_node').Schema;
+    Schema = require('../').Schema;
 
 /* hack to make the tests pass with node v0.3.0's new Buffer model */
 /* copied from http://github.com/bnoordhuis/node-iconv/blob/master/test.js */
