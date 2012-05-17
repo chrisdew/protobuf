@@ -24,11 +24,6 @@ This installs the npm package.
 
     npm install protobuf
 
-For Ubuntu, the following step may be unneeded now.
-
-    echo "/home/chris/node_modules/protobuf/build/Release/" | sudo tee /etc/ld.so.conf.d/protobuf.conf
-    (replace /home/chris/node_modules with wherever you installed the module)
-
 For Ubuntu, update library paths.
 
     sudo ldconfig
@@ -39,7 +34,7 @@ For OSX, you might need to add the path:
 
 And test that it works...  Run node, try 
 
-    require('protobuf');"
+    require('protobuf');
 
 you should see: 
 
