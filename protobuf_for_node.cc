@@ -469,6 +469,7 @@ namespace protobuf_for_node {
 
  // services
 
+/*
   class WrappedService : public ObjectWrap {
   public:
     static Handle<Value> Invoke(const Arguments& args) {
@@ -546,7 +547,7 @@ namespace protobuf_for_node {
     class AsyncInvocation {
     public:
       static void Init() {
-        ev_async_init(&ev_done, &InvokeAsyncCallbacks);
+        uv_async_init(uv_default_loop(), &ev_done, &InvokeAsyncCallbacks);
       }
 
       // main thread:
@@ -556,10 +557,10 @@ namespace protobuf_for_node {
                         Message* response,
                         Schema::Type* response_type,
                         Handle<Function> cb) {
-        eio_custom(&AsyncInvocation::Run,
-                   EIO_PRI_DEFAULT,
-                   &AsyncInvocation::Returned,
-                   static_cast<void*>(new AsyncInvocation(service, method, request, response, response_type, cb)));
+
+        uv_work_t *req = new uv_work_t;
+
+        uv_queue_work(uv_default_loop(), req, &AsyncInvocation::Run, &AsyncInvocation::Returned);
         ev_ref(EV_DEFAULT_UC);
       }
 
@@ -587,10 +588,10 @@ namespace protobuf_for_node {
       }
 
       static AsyncInvocation* head;
-      static ev_async ev_done;
+      static uv_async_t ev_done;
 
       // in some thread:
-      static void Run(eio_req* req) {
+      static void Run(uv_work_t *req) {
         AsyncInvocation* self = static_cast<AsyncInvocation*>(req->data);
         self->service_->service_->CallMethod(self->method_,
                                              NULL,
@@ -602,28 +603,25 @@ namespace protobuf_for_node {
       // in some thread:
       static void Done(AsyncInvocation* self) {
         self->done_ = true;
-        ev_async_send(EV_DEFAULT_UC_ &ev_done);
+        uv_async_send(&ev_done);
       }
 
       // main thread: service method returned
-      static int Returned(eio_req* req) {
+      static void Returned(uv_work_t* req) {
         AsyncInvocation* self = static_cast<AsyncInvocation*>(req->data);
         if (self->done_) {
           InvokeCallback(self);
         } else {
           // first delayed response?
-          if (!head) ev_async_start(EV_DEFAULT_UC_ &AsyncInvocation::ev_done);
 
           // enqueue
           self->next_ = head;
           head = self;
         }
-
-        return 0;
       }
 
       // main thread: service called Done() delayed
-      static void InvokeAsyncCallbacks(EV_P_ ev_async *, int) {
+      static void InvokeAsyncCallbacks(uv_async_t *a, int b) {
         AsyncInvocation** pself = &head;
         AsyncInvocation* self;
         while ((self = *pself)) {
@@ -636,7 +634,9 @@ namespace protobuf_for_node {
         }
 
         // all outstanding callbacks delivered
-        if (!head) ev_async_stop(EV_DEFAULT_UC_ &ev_done);
+        if (!head) {
+          uv_close((uv_handle_t*) &ev_done, NULL);
+	}
       }
 
       static void InvokeCallback(AsyncInvocation* self) {
@@ -659,7 +659,8 @@ namespace protobuf_for_node {
     };
   };
   WrappedService::AsyncInvocation* WrappedService::AsyncInvocation::head = NULL;
-  ev_async WrappedService::AsyncInvocation::ev_done;
+  uv_async_t WrappedService::AsyncInvocation::ev_done;
+*/
 
   static void Init() {
     if (!TypeTemplate.IsEmpty()) return;
@@ -690,12 +691,12 @@ namespace protobuf_for_node {
     ServiceTemplate->SetClassName(String::New("Service"));
     ServiceTemplate->InstanceTemplate()->SetInternalFieldCount(2);
 
-    MethodTemplate  = Persistent<FunctionTemplate>::New(FunctionTemplate::New(WrappedService::Invoke));
+    //MethodTemplate  = Persistent<FunctionTemplate>::New(FunctionTemplate::New(WrappedService::Invoke));
 
     ParseTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Schema::Type::Parse));
     SerializeTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Schema::Type::Serialize));
 
-    WrappedService::Init();
+    //WrappedService::Init();
   }
 
   Local<Function> SchemaConstructor() {
@@ -705,7 +706,7 @@ namespace protobuf_for_node {
 
   void ExportService(Handle<Object> target, const char* name, Service* service) {
     Init();
-    target->Set(String::New(name), (new WrappedService(service))->handle_);
+    //target->Set(String::New(name), (new WrappedService(service))->handle_);
   }
 
 }  // namespace protobuf_for_node
