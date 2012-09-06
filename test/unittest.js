@@ -1,7 +1,7 @@
 var assert = require('assert'),
     puts = require('util').puts,
     read = require('fs').readFileSync,
-    Schema = require('../').Schema;
+    Schema = require('protobuf').Schema;
 
 /* hack to make the tests pass with node v0.3.0's new Buffer model */
 /* copied from http://github.com/bnoordhuis/node-iconv/blob/master/test.js */
@@ -12,9 +12,9 @@ assert.bufferEqual = function(a, b, c) {
                 c);
 };
 
-var T = new Schema(read('test/unittest.desc'))['protobuf_unittest.TestAllTypes'];
+var T = new Schema(read('unittest.desc'))['protobuf_unittest.TestAllTypes'];
 assert.ok(T, 'type in schema');
-var golden = read('test/golden_message');
+var golden = read('golden_message');
 var message = T.parse(golden);
 assert.ok(message, 'parses message');  // currently rather crashes
 
