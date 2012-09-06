@@ -20,7 +20,7 @@ var puts = require('util').puts;
 var Schema = require('protobuf').Schema;
 
 // "schema" contains all message types defined in feeds.proto|desc.
-var schema = new Schema(fs.readFileSync('example/feeds.desc'));
+var schema = new Schema(fs.readFileSync('feeds.desc'));
 // The "Feed" message.
 var Feed = schema['feeds.Feed'];
 
