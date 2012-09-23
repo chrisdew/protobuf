@@ -39,6 +39,8 @@ using google::protobuf::MethodDescriptor;
 using google::protobuf::Reflection;
 using google::protobuf::Service;
 using google::protobuf::ServiceDescriptor;
+using google::protobuf::int64;
+using google::protobuf::uint64;
 
 using node::ObjectWrap;
 using node::Buffer;
@@ -203,10 +205,14 @@ namespace protobuf_for_node {
           return Integer::New(GET(Int32));
         case FieldDescriptor::CPPTYPE_UINT32:
           return Integer::NewFromUnsigned(GET(UInt32));
-        case FieldDescriptor::CPPTYPE_INT64:
-          return Number::New(GET(Int64));
-        case FieldDescriptor::CPPTYPE_UINT64:
-          return Number::New(GET(UInt64));
+        case FieldDescriptor::CPPTYPE_INT64: {
+          int64 value = GET(Int64);
+          return Buffer::New((char *)&value, sizeof(value))->handle_;
+        }
+        case FieldDescriptor::CPPTYPE_UINT64: {
+          uint64 value = GET(UInt64);
+          return Buffer::New((char *)&value, sizeof(value))->handle_;
+        }
         case FieldDescriptor::CPPTYPE_FLOAT:
           return Number::New(GET(Float));
         case FieldDescriptor::CPPTYPE_DOUBLE:
@@ -316,10 +322,18 @@ namespace protobuf_for_node {
           SET(UInt32, value->Uint32Value());
           break;
         case FieldDescriptor::CPPTYPE_INT64:
-          SET(Int64, value->NumberValue());
+          if (Buffer::HasInstance(value)) {
+            SET(Int64, *(int64 *)Buffer::Data(value->ToObject()));
+          } else {
+            SET(Int64, value->NumberValue());
+          }
           break;
         case FieldDescriptor::CPPTYPE_UINT64:
-          SET(UInt64, value->NumberValue());
+          if (Buffer::HasInstance(value)) {
+            SET(UInt64, *(uint64 *)Buffer::Data(value->ToObject()));
+          } else {
+            SET(UInt64, value->NumberValue());
+          }
           break;
         case FieldDescriptor::CPPTYPE_FLOAT:
           SET(Float, value->NumberValue());
