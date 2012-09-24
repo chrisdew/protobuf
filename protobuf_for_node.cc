@@ -12,22 +12,22 @@
 // implied. See the License for the specific language governing
 // permissions and limitations under the License.
 
-#include "protobuf_for_node.h"
-
 #include <map>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <sstream>
 
+#include <node.h>
+#include <node_buffer.h>
+#include <node_object_wrap.h>
+
 #include <google/protobuf/dynamic_message.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/service.h>
 
-#include <node.h>
-#include <node_buffer.h>
-#include <node_object_wrap.h>
+#include "protobuf_for_node.h"
 
 using google::protobuf::Descriptor;
 using google::protobuf::DescriptorPool;
