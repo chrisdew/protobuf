@@ -13,6 +13,13 @@ All the best,
 Chris.
 
 
+P.S. Mac/OSX note: A bug has been reported.  Mac users can still use v0.8.0 of protobuf, by following the instructions for NodeJS 0.6.x, but typing:
+
+    npm install protobuf@0.8.0
+
+to install the older version.
+
+
 
 
 Older instructions for use with the NodeJS 0.6.x series.
