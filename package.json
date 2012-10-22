@@ -1,11 +1,11 @@
 { "name" : "protobuf",
-  "version" : "0.3.1",
+  "version" : "0.8.0",
   "description" : "Protocol Buffers for NodeJS",
   "author": {
     "Matthias Ernst": "mernst@google.com"
   },
   "main": "./build/Release/protobuf_for_node",
-  "engines": { "node": ">= 0.6.0 < 0.7.0" },
+  "engines": { "node": ">= 0.8.0 < 0.9.0" },
   "repository": {
     "type": "git",
     "url": "git://github.com/chrisdew/protobuf.git"

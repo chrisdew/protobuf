@@ -1,6 +1,22 @@
 This is a fork of http://code.google.com/p/protobuf-for-node/
 
-It now works with the NodeJS 0.6.x series.
+It now works with the NodeJS 0.8.x series.
+
+To install, just type:
+
+    npm install protobuf
+
+Thanks to work by seishun, it now uses node-gyp and has google's protocol bufferes library integrated, so no separate installtion required.
+
+All the best,
+
+Chris.
+
+
+
+
+Older instructions for use with the NodeJS 0.6.x series.
+========================================================
 
 Prerequisites:
 --------------
