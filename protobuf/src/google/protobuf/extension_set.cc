@@ -885,17 +885,16 @@ bool ExtensionSet::ParseField(uint32 tag, io::CodedInputStream* input,
 }
 
 bool ExtensionSet::ParseField(uint32 tag, io::CodedInputStream* input,
-                              const MessageLite* containing_type,
-                              UnknownFieldSet* unknown_fields) {
-  FieldSkipper skipper(unknown_fields);
+                              const MessageLite* containing_type) {
+  FieldSkipper skipper;
   GeneratedExtensionFinder finder(containing_type);
   return ParseField(tag, input, &finder, &skipper);
 }
 
 // Defined in extension_set_heavy.cc.
-// bool ExtensionSet::ParseFieldHeavy(uint32 tag, io::CodedInputStream* input,
-//                                    const Message* containing_type,
-//                                    UnknownFieldSet* unknown_fields)
+// bool ExtensionSet::ParseField(uint32 tag, io::CodedInputStream* input,
+//                               const MessageLite* containing_type,
+//                               UnknownFieldSet* unknown_fields)
 
 bool ExtensionSet::ParseMessageSet(io::CodedInputStream* input,
                                    ExtensionFinder* extension_finder,
@@ -920,17 +919,16 @@ bool ExtensionSet::ParseMessageSet(io::CodedInputStream* input,
 }
 
 bool ExtensionSet::ParseMessageSet(io::CodedInputStream* input,
-                                   const MessageLite* containing_type,
-                                   UnknownFieldSet* unknown_fields) {
-  FieldSkipper skipper(unknown_fields);
+                                   const MessageLite* containing_type) {
+  FieldSkipper skipper;
   GeneratedExtensionFinder finder(containing_type);
   return ParseMessageSet(input, &finder, &skipper);
 }
 
 // Defined in extension_set_heavy.cc.
-// bool ExtensionSet::ParseMessageSetHeavy(io::CodedInputStream* input,
-//                                         const Message* containing_type,
-//                                         UnknownFieldSet* unknown_fields);
+// bool ExtensionSet::ParseMessageSet(io::CodedInputStream* input,
+//                                    const MessageLite* containing_type,
+//                                    UnknownFieldSet* unknown_fields);
 
 bool ExtensionSet::ParseMessageSetItem(io::CodedInputStream* input,
                                        ExtensionFinder* extension_finder,
