@@ -203,10 +203,18 @@ namespace protobuf_for_node {
           return Integer::New(GET(Int32));
         case FieldDescriptor::CPPTYPE_UINT32:
           return Integer::NewFromUnsigned(GET(UInt32));
-        case FieldDescriptor::CPPTYPE_INT64:
-          return Number::New(GET(Int64));
-        case FieldDescriptor::CPPTYPE_UINT64:
-          return Number::New(GET(UInt64));
+        case FieldDescriptor::CPPTYPE_INT64: {
+          std::ostringstream ss;
+          ss << GET(Int64);
+          string s = ss.str();
+          return String::New(s.data(), s.length());
+        }
+        case FieldDescriptor::CPPTYPE_UINT64: {
+          std::ostringstream ss;
+          ss << GET(UInt64);
+          string s = ss.str();
+          return String::New(s.data(), s.length());
+        }
         case FieldDescriptor::CPPTYPE_FLOAT:
           return Number::New(GET(Float));
         case FieldDescriptor::CPPTYPE_DOUBLE:
@@ -316,10 +324,22 @@ namespace protobuf_for_node {
           SET(UInt32, value->Uint32Value());
           break;
         case FieldDescriptor::CPPTYPE_INT64:
-          SET(Int64, value->NumberValue());
+          if (value->IsString()) {
+            google::protobuf::int64 ll;
+            std::istringstream(*String::Utf8Value(value)) >> ll;
+            SET(Int64, ll);
+          } else {
+            SET(Int64, value->NumberValue());
+          }
           break;
         case FieldDescriptor::CPPTYPE_UINT64:
-          SET(UInt64, value->NumberValue());
+          if (value->IsString()) {
+            google::protobuf::uint64 ull;
+            std::istringstream(*String::Utf8Value(value)) >> ull;
+            SET(UInt64, ull);
+          } else {
+            SET(UInt64, value->NumberValue());
+          }
           break;
         case FieldDescriptor::CPPTYPE_FLOAT:
           SET(Float, value->NumberValue());
