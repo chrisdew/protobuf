@@ -143,11 +143,11 @@ namespace protobuf_for_node {
           from <<
             "var x = arr[" << i << "]; "
             "if(x !== undefined) this['" <<
-            descriptor->field(i)->name() <<
+            descriptor->field(i)->camelcase_name() <<
             "'] = x; ";
 
           if (i > 0) to << ", ";
-          to << "this['" << descriptor->field(i)->name() << "']";
+          to << "this['" << descriptor->field(i)->camelcase_name() << "']";
         }
 
         from << " }})";
