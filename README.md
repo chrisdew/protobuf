@@ -15,6 +15,58 @@ Chris.
 P.S. Breaking change in 0.8.6:
 uint64 and int64 are now read as Javascript Strings, rather than floating point numbers.  They can still be set from Javascript Numbers (as well as from string).
 
+P.P.S. Here's an example I did for https://github.com/chrisdew/protobuf/issues/29 - most users won't need the complication of `bytes` fields.
+
+buftest.proto
+
+    package com.chrisdew.buftest;
+
+    message BufTest {
+      optional float num  = 1;
+      optional bytes payload = 2;
+    }
+
+buftest.js
+
+    var fs = require('fs');
+    var Schema = require('protobuf').Schema;
+
+    // "schema" contains all message types defined in buftest.proto|desc.
+    var schema = new Schema(fs.readFileSync('buftest.desc'));
+
+    // The "BufTest" message.
+    var BufTest = schema['com.chrisdew.buftest.BufTest'];
+
+    var ob = { num: 42 };
+    ob.payload = new Buffer("Hello World");
+
+    var proto = BufTest.serialize(ob);
+    console.log('proto.length:', proto.length);
+
+    var outOb = BufTest.parse(proto);
+    console.log('unserialised:', JSON.stringify(outOb));
+
+    var payload = new Buffer(outOb.payload);
+    console.log(payload);
+
+Makefile: (second line begins with a TAB not spaces)
+
+    all:
+        protoc --descriptor_set_out=buftest.desc --include_imports buftest.proto
+
+
+output:
+
+    $ node buftest.js 
+    proto.length: 18
+    unserialised: {"num":42,"payload":{"0":72,"1":101,"2":108,"3":108,"4":111,"5":32,"6":87,"7":111,"8":114,"9":108,"10":100,"length":11}}
+    payload: <Buffer 48 65 6c 6c 6f 20 57 6f 72 6c 64>
+
+
+
+
+
+
 
 
 
