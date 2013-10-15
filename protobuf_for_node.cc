@@ -204,14 +204,24 @@ namespace protobuf_for_node {
         case FieldDescriptor::CPPTYPE_UINT32:
           return Integer::NewFromUnsigned(GET(UInt32));
         case FieldDescriptor::CPPTYPE_INT64: {
+          int64_t value = GET(Int64);
+          if (value >= MIN_SAFE_INTEGER && value <= MAX_SAFE_INTEGER) {
+            return Number::New(value);
+          }
+          // use string instead
           std::ostringstream ss;
-          ss << GET(Int64);
+          ss << value;
           string s = ss.str();
           return String::New(s.data(), s.length());
         }
         case FieldDescriptor::CPPTYPE_UINT64: {
+          uint64_t value = GET(UInt64);
+          if (value >= MIN_SAFE_UNSIGNED_INTEGER && value <= MAX_SAFE_UNSIGNED_INTEGER) {
+            return Number::New(value);
+          }
+          // use string instead
           std::ostringstream ss;
-          ss << GET(UInt64);
+          ss << value;
           string s = ss.str();
           return String::New(s.data(), s.length());
         }
