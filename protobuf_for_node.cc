@@ -205,13 +205,13 @@ namespace protobuf_for_node {
           return Integer::NewFromUnsigned(GET(UInt32));
         case FieldDescriptor::CPPTYPE_INT64: {
           std::ostringstream ss;
-          ss << GET(Int64);
+          ss << std::hex << GET(Int64);
           string s = ss.str();
           return String::New(s.data(), s.length());
         }
         case FieldDescriptor::CPPTYPE_UINT64: {
           std::ostringstream ss;
-          ss << GET(UInt64);
+          ss << std::hex << GET(UInt64);
           string s = ss.str();
           return String::New(s.data(), s.length());
         }
@@ -326,7 +326,7 @@ namespace protobuf_for_node {
         case FieldDescriptor::CPPTYPE_INT64:
           if (value->IsString()) {
             google::protobuf::int64 ll;
-            std::istringstream(*String::Utf8Value(value)) >> ll;
+            std::istringstream(*String::Utf8Value(value)) >> std::hex >> ll;
             SET(Int64, ll);
           } else {
             SET(Int64, value->NumberValue());
@@ -335,7 +335,7 @@ namespace protobuf_for_node {
         case FieldDescriptor::CPPTYPE_UINT64:
           if (value->IsString()) {
             google::protobuf::uint64 ull;
-            std::istringstream(*String::Utf8Value(value)) >> ull;
+            std::istringstream(*String::Utf8Value(value)) >> std::hex >> ull;
             SET(UInt64, ull);
           } else {
             SET(UInt64, value->NumberValue());
