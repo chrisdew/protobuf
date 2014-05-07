@@ -1,6 +1,6 @@
 This is a fork of http://code.google.com/p/protobuf-for-node/
 
-It now works with the NodeJS 0.8.x series.
+It now works with the NodeJS 0.8.x and 0.10.x series.
 
 To install, just type:
 
