@@ -1,7 +1,7 @@
 New Maintainer Required
 -----------------------
 
-Due to the amount of changes required to make protobuf work with Node v0.11.13+, and my increasing distaste for C++ (but not C), I have decided to step down from maintaing this project (and all my other C++ npm modules).
+Due to the amount of changes required to make protobuf work with Node v0.11.13+, and my increasing distaste for C++ (but not plain C, of course), I have decided to step down from maintaing this project (and all my other C++ npm modules).
 
 If someone would like to take over as maintainer of protobuf, please contact me.
 
