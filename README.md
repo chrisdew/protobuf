@@ -1,3 +1,16 @@
+New Maintainer Required
+-----------------------
+
+Due to the amount of changes required to make protobuf work with v0.11.13+, and my increasing distaste for C++ (but not C), I have decided to step down from maintaing this project.
+
+If someone would like to take over as maintainer of protobuf, please contact me.
+
+Many thanks to everyone who has provided bug reports and pull requests over the last couple of years.
+
+
+Protobuf
+--------
+
 This is a fork of http://code.google.com/p/protobuf-for-node/
 
 It now works with the NodeJS 0.8.x and 0.10.x series.
