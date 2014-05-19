@@ -129,9 +129,11 @@ const string kEmptyString;
 string ToCamelCase(const string& input) {
   bool capitalize_next = false;
   string result;
-  result.reserve(input.size());
+  size_t length = input.size();
 
-  for (int i = 0; i < input.size(); i++) {
+  result.reserve(length);
+
+  for (size_t i = 0; i < length; i++) {
     if (input[i] == '_') {
       capitalize_next = true;
     } else if (capitalize_next) {
@@ -208,8 +210,6 @@ struct PointerStringPairHash {
   }
 
   // Used only by MSVC and platforms where hash_map is not available.
-  static const size_t bucket_size = 4;
-  static const size_t min_buckets = 8;
   inline bool operator()(const PointerStringPair& a,
                          const PointerStringPair& b) const {
     if (a.first < b.first) return true;
@@ -489,7 +489,9 @@ DescriptorPool::Tables::~Tables() {
   // Note that the deletion order is important, since the destructors of some
   // messages may refer to objects in allocations_.
   STLDeleteElements(&messages_);
-  for (int i = 0; i < allocations_.size(); i++) {
+
+  size_t length = allocations_.size();
+  for (size_t i = 0; i < length; i++) {
     operator delete(allocations_[i]);
   }
   STLDeleteElements(&strings_);
@@ -513,13 +515,20 @@ void DescriptorPool::Tables::Checkpoint() {
 }
 
 void DescriptorPool::Tables::Rollback() {
-  for (int i = 0; i < symbols_after_checkpoint_.size(); i++) {
+  size_t length;
+
+  length = symbols_after_checkpoint_.size();
+  for (size_t i = 0; i < length; i++) {
     symbols_by_name_.erase(symbols_after_checkpoint_[i]);
   }
-  for (int i = 0; i < files_after_checkpoint_.size(); i++) {
+
+  length = files_after_checkpoint_.size();
+  for (size_t i = 0; i < length; i++) {
     files_by_name_.erase(files_after_checkpoint_[i]);
   }
-  for (int i = 0; i < extensions_after_checkpoint_.size(); i++) {
+
+  length = extensions_after_checkpoint_.size();
+  for (size_t i = 0; i < length; i++) {
     extensions_.erase(extensions_after_checkpoint_[i]);
   }
 
@@ -533,7 +542,9 @@ void DescriptorPool::Tables::Rollback() {
     messages_.begin() + messages_before_checkpoint_, messages_.end());
   STLDeleteContainerPointers(
     file_tables_.begin() + file_tables_before_checkpoint_, file_tables_.end());
-  for (int i = allocations_before_checkpoint_; i < allocations_.size(); i++) {
+
+  length = allocations_.size();
+  for (size_t i = allocations_before_checkpoint_; i < length; i++) {
     operator delete(allocations_[i]);
   }
 
@@ -986,7 +997,8 @@ void DescriptorPool::FindAllExtensions(
     vector<int> numbers;
     if (fallback_database_->FindAllExtensionNumbers(extendee->full_name(),
                                                     &numbers)) {
-      for (int i = 0; i < numbers.size(); ++i) {
+      size_t length = numbers.size();
+      for (size_t i = 0; i < length; ++i) {
         int number = numbers[i];
         if (tables_->FindExtension(extendee, number) == NULL) {
           TryFindExtensionInFallbackDatabase(extendee, number);
@@ -1495,7 +1507,9 @@ bool RetrieveOptions(const Message &options, vector<string> *option_entries) {
   const Reflection* reflection = options.GetReflection();
   vector<const FieldDescriptor*> fields;
   reflection->ListFields(options, &fields);
-  for (int i = 0; i < fields.size(); i++) {
+
+  size_t length = fields.size();
+  for (size_t i = 0; i < length; i++) {
     // Doesn't make sense to have message type fields here
     if (fields[i]->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) {
       continue;
@@ -1531,7 +1545,8 @@ bool FormatLineOptions(int depth, const Message &options, string *output) {
   string prefix(depth * 2, ' ');
   vector<string> all_options;
   if (RetrieveOptions(options, &all_options)) {
-    for (int i = 0; i < all_options.size(); i++) {
+    size_t length = all_options.size();
+    for (size_t i = 0; i < length; i++) {
       strings::SubstituteAndAppend(output, "$0option $1;\n",
                                    prefix, all_options[i]);
     }
@@ -2356,7 +2371,7 @@ Symbol DescriptorBuilder::LookupSymbolNoPlaceholder(
   //   }
   // So, we look for just "Foo" first, then look for "Bar.baz" within it if
   // found.
-  int name_dot_pos = name.find_first_of('.');
+  size_t name_dot_pos = name.find_first_of('.');
   string first_part_of_name;
   if (name_dot_pos == string::npos) {
     first_part_of_name = name;
@@ -2604,7 +2619,9 @@ void DescriptorBuilder::ValidateSymbolName(
     AddError(full_name, proto, DescriptorPool::ErrorCollector::NAME,
              "Missing name.");
   } else {
-    for (int i = 0; i < name.size(); i++) {
+    size_t length = name.size();
+
+    for (size_t i = 0; i < length; i++) {
       // I don't trust isalnum() due to locales.  :(
       if ((name[i] < 'a' || 'z' < name[i]) &&
           (name[i] < 'A' || 'Z' < name[i]) &&
@@ -2619,8 +2636,9 @@ void DescriptorBuilder::ValidateSymbolName(
 
 bool DescriptorBuilder::ValidateQualifiedName(const string& name) {
   bool last_was_period = false;
+  size_t length = name.size();
 
-  for (int i = 0; i < name.size(); i++) {
+  for (size_t i = 0; i < length; i++) {
     // I don't trust isalnum() due to locales.  :(
     if (('a' <= name[i] && name[i] <= 'z') ||
         ('A' <= name[i] && name[i] <= 'Z') ||
@@ -2725,7 +2743,8 @@ const FileDescriptor* DescriptorBuilder::BuildFile(
   //   mid-file, but that's pretty ugly, and I'm pretty sure there are
   //   some languages out there that do not allow recursive dependencies
   //   at all.
-  for (int i = 0; i < tables_->pending_files_.size(); i++) {
+  size_t length = tables_->pending_files_.size();
+  for (size_t i = 0; i < length; i++) {
     if (tables_->pending_files_[i] == proto.name()) {
       string error_message("File recursively imports itself: ");
       for (; i < tables_->pending_files_.size(); i++) {

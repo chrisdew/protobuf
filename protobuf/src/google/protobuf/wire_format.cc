@@ -54,15 +54,6 @@ namespace internal {
 
 using internal::WireFormatLite;
 
-namespace {
-
-// This function turns out to be convenient when using some macros later.
-inline int GetEnumNumber(const EnumValueDescriptor* descriptor) {
-  return descriptor->number();
-}
-
-}  // anonymous namespace
-
 // ===================================================================
 
 bool UnknownFieldSetFieldSkipper::SkipField(
@@ -716,7 +707,9 @@ void WireFormat::SerializeWithCachedSizes(
 
   vector<const FieldDescriptor*> fields;
   message_reflection->ListFields(message, &fields);
-  for (int i = 0; i < fields.size(); i++) {
+
+  size_t length = fields.size();
+  for (size_t i = 0; i < length; i++) {
     SerializeFieldWithCachedSizes(fields[i], message, output);
   }
 
@@ -886,7 +879,9 @@ int WireFormat::ByteSize(const Message& message) {
 
   vector<const FieldDescriptor*> fields;
   message_reflection->ListFields(message, &fields);
-  for (int i = 0; i < fields.size(); i++) {
+
+  size_t length = fields.size();
+  for (size_t i = 0; i < length; i++) {
     our_size += FieldByteSize(fields[i], message);
   }
 

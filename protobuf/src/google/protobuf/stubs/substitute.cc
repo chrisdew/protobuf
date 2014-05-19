@@ -107,7 +107,7 @@ void SubstituteAndAppend(
   if (size == 0) return;
 
   // Build the string.
-  int original_size = output->size();
+  size_t original_size = output->size();
   STLStringResizeUninitialized(output, original_size + size);
   char* target = string_as_array(output) + original_size;
   for (int i = 0; format[i] != '\0'; i++) {
@@ -126,7 +126,16 @@ void SubstituteAndAppend(
     }
   }
 
-  GOOGLE_DCHECK_EQ(target - output->data(), output->size());
+  const char* data = output->data();
+
+  if (target < data) {
+    GOOGLE_LOG(DFATAL)
+      << "strings::Substitute target - output->data() pointer overflow.";
+    return;
+  }
+
+  size_t length = (size_t)(target - data);
+  GOOGLE_DCHECK_EQ(length, output->size());
 }
 
 }  // namespace strings

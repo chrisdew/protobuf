@@ -714,8 +714,10 @@ class TextFormat::Printer::TextGenerator {
   // Reduces the current indent level by two spaces, or crashes if the indent
   // level is zero.
   void Outdent() {
+    size_t length = indent_.size();
     if (indent_.empty() ||
-        indent_.size() < initial_indent_level_ * 2) {
+        (initial_indent_level_ < 0) ||
+        (length < ((size_t)initial_indent_level_ * 2))) {
       GOOGLE_LOG(DFATAL) << " Outdent() without matching Indent().";
       return;
     }
@@ -943,7 +945,9 @@ void TextFormat::Printer::Print(const Message& message,
   const Reflection* reflection = message.GetReflection();
   vector<const FieldDescriptor*> fields;
   reflection->ListFields(message, &fields);
-  for (int i = 0; i < fields.size(); i++) {
+
+  size_t length = fields.size();
+  for (size_t i = 0; i < length; i++) {
     PrintField(message, reflection, fields[i], generator);
   }
   PrintUnknownFields(reflection->GetUnknownFields(message), generator);
