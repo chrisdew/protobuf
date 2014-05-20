@@ -19,8 +19,7 @@
 #include <sstream>
 
 #include <node.h>
-#include <node_buffer.h>
-#include <node_object_wrap.h>
+#include <nan.h>
 
 #include <google/protobuf/dynamic_message.h>
 #include <google/protobuf/descriptor.h>
@@ -41,7 +40,6 @@ using google::protobuf::Service;
 using google::protobuf::ServiceDescriptor;
 
 using node::ObjectWrap;
-using node::Buffer;
 
 using std::map;
 using std::string;
@@ -50,27 +48,19 @@ using std::cerr;
 using std::endl;
 
 using v8::Array;
-using v8::AccessorInfo;
-using v8::Arguments;
-using v8::Boolean;
 using v8::Context;
-using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionTemplate;
 using v8::Integer;
 using v8::Handle;
-using v8::HandleScope;
-using v8::InvocationCallback;
 using v8::Local;
-using v8::NamedPropertyGetter;
 using v8::Number;
 using v8::Object;
 using v8::ObjectTemplate;
 using v8::Persistent;
 using v8::Script;
 using v8::String;
-using v8::ThrowException;
 using v8::Value;
 using v8::V8;
 
@@ -78,16 +68,6 @@ namespace protobuf_for_node {
   const char E_NO_ARRAY[] = "Not an array";
   const char E_NO_OBJECT[] = "Not an object";
   const char E_UNKNOWN_ENUM[] = "Unknown enum value";
-
-  template <typename T>
-  static T* UnwrapThis(const Arguments& args) {
-    return ObjectWrap::Unwrap<T>(args.This());
-  }
-
-  template <typename T>
-  static T* UnwrapThis(const AccessorInfo& args) {
-    return ObjectWrap::Unwrap<T>(args.This());
-  }
 
   Persistent<FunctionTemplate> SchemaTemplate;
   Persistent<FunctionTemplate> ServiceSchemaTemplate;
@@ -102,7 +82,7 @@ namespace protobuf_for_node {
     Schema(Handle<Object> self, const DescriptorPool* pool)
         : pool_(pool) {
       factory_.SetDelegateToGeneratedFactory(true);
-      self->SetInternalField(1, Array::New());
+      self->SetInternalField(1, NanNew<Array>());
       Wrap(self);
     }
 
@@ -121,7 +101,8 @@ namespace protobuf_for_node {
       }
 
       Handle<Function> Constructor() const {
-        return handle_->GetInternalField(2).As<Function>();
+        Local<Object> handle = NanObjectWrapHandle(const_cast<Type *>(this));
+        return handle->GetInternalField(2).As<Function>();
       }
 
       Local<Object> NewObject(Handle<Value> properties) const {
@@ -154,14 +135,14 @@ namespace protobuf_for_node {
         to << " ]; })";
 
         // managed type->schema link
-        self->SetInternalField(1, schema_->handle_);
+        self->SetInternalField(1, NanObjectWrapHandle(schema_));
 
         Handle<Function> constructor =
-          Script::Compile(String::New(from.str().c_str()))->Run().As<Function>();
-        constructor->SetHiddenValue(String::New("type"), self);
+          Script::Compile(NanNew<String>(from.str().c_str()))->Run().As<Function>();
+        constructor->SetHiddenValue(NanNew<String>("type"), self);
 
         Handle<Function> bind =
-          Script::Compile(String::New(
+          Script::Compile(NanNew<String>(
               "(function(self) {"
               "  var f = this;"
               "  return function(arg) {"
@@ -169,10 +150,14 @@ namespace protobuf_for_node {
               "  };"
               "})"))->Run().As<Function>();
         Handle<Value> arg = self;
-        constructor->Set(String::New("parse"), bind->Call(ParseTemplate->GetFunction(), 1, &arg));
-        constructor->Set(String::New("serialize"), bind->Call(SerializeTemplate->GetFunction(), 1, &arg));
+
+        Local<FunctionTemplate> parseTemplate = NanNew(ParseTemplate);
+        Local<FunctionTemplate> serializeTemplate = NanNew(SerializeTemplate);
+
+        constructor->Set(NanNew<String>("parse"), bind->Call(parseTemplate->GetFunction(), 1, &arg));
+        constructor->Set(NanNew<String>("serialize"), bind->Call(serializeTemplate->GetFunction(), 1, &arg));
         self->SetInternalField(2, constructor);
-        self->SetInternalField(3, Script::Compile(String::New(to.str().c_str()))->Run());
+        self->SetInternalField(3, Script::Compile(NanNew<String>(to.str().c_str()))->Run());
 
         Wrap(self);
       }
@@ -193,39 +178,42 @@ namespace protobuf_for_node {
         case FieldDescriptor::CPPTYPE_STRING: {
           const string& value = GET(String);
           if (field->type() == FieldDescriptor::TYPE_BYTES) {
-            return Buffer::New(const_cast<char *>(value.data()),
-                               value.length())->handle_;
+            return NanNewBufferHandle(const_cast<char *>(value.data()),
+                                      value.length());
           } else {
-            return String::New(value.data(), value.length());
+            return NanNew<String>(value.data(), value.length());
           }
         }
         case FieldDescriptor::CPPTYPE_INT32:
-          return Integer::New(GET(Int32));
+          return NanNew<v8::Int32>(GET(Int32));
         case FieldDescriptor::CPPTYPE_UINT32:
-          return Integer::NewFromUnsigned(GET(UInt32));
+          return NanNew<v8::Uint32>(GET(UInt32));
         case FieldDescriptor::CPPTYPE_INT64: {
           std::ostringstream ss;
           ss << GET(Int64);
           string s = ss.str();
-          return String::New(s.data(), s.length());
+          return NanNew<String>(s.data(), s.length());
         }
         case FieldDescriptor::CPPTYPE_UINT64: {
           std::ostringstream ss;
           ss << GET(UInt64);
           string s = ss.str();
-          return String::New(s.data(), s.length());
+          return NanNew<String>(s.data(), s.length());
         }
         case FieldDescriptor::CPPTYPE_FLOAT:
-          return Number::New(GET(Float));
+          return NanNew<Number>(GET(Float));
         case FieldDescriptor::CPPTYPE_DOUBLE:
-          return Number::New(GET(Double));
+          return NanNew<Number>(GET(Double));
         case FieldDescriptor::CPPTYPE_BOOL:
-          return Boolean::New(GET(Bool));
+          if (GET(Bool)) {
+            return NanTrue();
+          }
+          return NanFalse();
         case FieldDescriptor::CPPTYPE_ENUM:
-          return String::New(GET(Enum)->name().c_str());
+          return NanNew<String>(GET(Enum)->name().c_str());
         }
 
-        return Handle<Value>();  // NOTREACHED
+        return NanUndefined();  // NOTREACHED
       }
 #undef GET
 
@@ -233,9 +221,9 @@ namespace protobuf_for_node {
         const Reflection* reflection = instance.GetReflection();
         const Descriptor* descriptor = instance.GetDescriptor();
 
-        Handle<Array> properties = Array::New(descriptor->field_count());
+        Handle<Array> properties = NanNew<Array>(descriptor->field_count());
         for (int i = 0; i < descriptor->field_count(); i++) {
-          HandleScope scope;
+          NanScope();
 
           const FieldDescriptor* field = descriptor->field(i);
           bool repeated = field->is_repeated();
@@ -249,7 +237,7 @@ namespace protobuf_for_node {
           Handle<Value> value;
           if (field->is_repeated()) {
             int size = reflection->FieldSize(instance, field);
-            Handle<Array> array = Array::New(size);
+            Handle<Array> array = NanNew<Array>(size);
             for (int j = 0; j < size; j++) {
               array->Set(j, ToJs(instance, reflection, field, child_type, j));
             }
@@ -264,24 +252,27 @@ namespace protobuf_for_node {
         return NewObject(properties);
       }
 
-      static Handle<Value> Parse(const Arguments& args) {
-        Type* type = UnwrapThis<Type>(args);
-        if (!Buffer::HasInstance(args[0])) {
-          return ThrowException(Exception::TypeError(
-             String::New("Argument should be a buffer")));
+      static NAN_METHOD(Parse) {
+        NanScope();
+
+        if ((args.Length() < 1) || (!node::Buffer::HasInstance(args[0]))) {
+          return NanThrowTypeError("Argument should be a buffer");
         }
+
         Local<Object> buffer_obj = args[0]->ToObject();
 
+        Type *type = Unwrap<Type>(args.This());
         Message* message = type->NewMessage();
         bool success =
-          message->ParseFromArray(Buffer::Data(buffer_obj), Buffer::Length(buffer_obj));
-        Handle<Value> result = success
-          ? Handle<Value>(type->ToJs(*message))
-                : v8::ThrowException(
-              v8::Exception::Error(String::New("Malformed message")));
+          message->ParseFromArray(node::Buffer::Data(buffer_obj), node::Buffer::Length(buffer_obj));
 
+        if (!success) {
+          return NanThrowError("Malformed message");
+        }
+
+        Handle<Value> result = Handle<Value>(type->ToJs(*message));
         delete message;
-        return result;
+        NanReturnValue(result);
       }
 
 #define SET(TYPE, EXPR)                                                 \
@@ -293,7 +284,7 @@ namespace protobuf_for_node {
                                  Handle<Value> value,
                                  const Type* type,
                                  bool repeated) {
-        HandleScope scope;
+        NanScope();
 
         const Reflection* reflection = instance->GetReflection();
         switch (field->cpp_type()) {
@@ -308,9 +299,9 @@ namespace protobuf_for_node {
           break;
         case FieldDescriptor::CPPTYPE_STRING: {
           // Shortcutting Utf8value(buffer.toString())
-          if (Buffer::HasInstance(value)) {
+          if (node::Buffer::HasInstance(value)) {
             Local<Object> buf = value->ToObject();
-            SET(String, string(Buffer::Data(buf), Buffer::Length(buf)));
+            SET(String, string(node::Buffer::Data(buf), node::Buffer::Length(buf)));
           } else {
             String::Utf8Value utf8(value);
             SET(String, string(*utf8, utf8.length()));
@@ -354,7 +345,7 @@ namespace protobuf_for_node {
           const google::protobuf::EnumValueDescriptor* enum_value =
             value->IsNumber() ?
             field->enum_type()->FindValueByNumber(value->Int32Value()) :
-            field->enum_type()->FindValueByName(*String::AsciiValue(value));
+            field->enum_type()->FindValueByName(*String::Utf8Value(value));
           if (!enum_value) {
             return E_UNKNOWN_ENUM;
           }
@@ -367,7 +358,8 @@ namespace protobuf_for_node {
 #undef SET
 
       const char* ToProto(Message* instance, Handle<Object> src) const {
-        Handle<Function> to_array = handle_->GetInternalField(3).As<Function>();
+        Local<Object> handle = NanObjectWrapHandle(const_cast<Type *>(this));
+        Handle<Function> to_array = handle->GetInternalField(3).As<Function>();
         Handle<Array> properties = to_array->Call(src, 0, NULL).As<Array>();
 
         const char* error = NULL;
@@ -384,7 +376,7 @@ namespace protobuf_for_node {
             if(!value->IsArray()) {
               error = E_NO_ARRAY;
               continue;
-            } 
+            }
 
             Handle<Array> array = value.As<Array>();
             int length = array->Length();
@@ -399,30 +391,36 @@ namespace protobuf_for_node {
         return error;
       }
 
-      static Handle<Value> Serialize(const Arguments& args) {
-        if (!args[0]->IsObject()) {
-          return v8::ThrowException(
-              v8::Exception::TypeError(v8::String::New("Not an object")));
+      static NAN_METHOD(Serialize) {
+        NanScope();
+
+        if ((args.Length() < 1) || (!args[0]->IsObject())) {
+          return NanThrowTypeError("Not an object");
         }
 
-        Type* type = UnwrapThis<Type>(args);
+        Type *type = Unwrap<Type>(args.This());
         Message* message = type->NewMessage();
         const char* error = type->ToProto(message, args[0].As<Object>());
-        Buffer* result;
+        Local<Object> result;
         if (!error) {
-          result = Buffer::New(message->ByteSize());
+          result = NanNewBufferHandle(message->ByteSize());
           message->SerializeWithCachedSizesToArray(
-              (google::protobuf::uint8*)Buffer::Data(result->handle_));
+              (google::protobuf::uint8*)node::Buffer::Data(result));
         }
         delete message;
 
-        return error
-          ? v8::ThrowException(v8::Exception::Error(String::New(error)))
-          : result->handle_;
+        if (error) {
+          return NanThrowError(error);
+        }
+
+        NanReturnValue(result);
       }
 
-      static Handle<Value> ToString(const Arguments& args) {
-        return String::New(UnwrapThis<Type>(args)->descriptor_->full_name().c_str());
+      static NAN_METHOD(ToString) {
+        NanScope();
+
+        Type *type = Unwrap<Type>(args.This());
+        NanReturnValue(NanNew<String>(type->descriptor_->full_name().c_str()));
       }
     };
 
@@ -434,12 +432,15 @@ namespace protobuf_for_node {
       Type* result = types_[descriptor];
       if (result) return result;
 
+      Local<FunctionTemplate> typeTemplate = NanNew(TypeTemplate);
       result = types_[descriptor] =
-        new Type(this, descriptor, TypeTemplate->GetFunction()->NewInstance());
+        new Type(this, descriptor, typeTemplate->GetFunction()->NewInstance());
 
       // managed schema->[type] link
-      Handle<Array> types = handle_->GetInternalField(1).As<Array>();
-      types->Set(types->Length(), result->handle_);
+      //
+      Local<Object> handle = NanObjectWrapHandle(const_cast<Schema *>(this));
+      Handle<Array> types = handle->GetInternalField(1).As<Array>();
+      types->Set(types->Length(), NanObjectWrapHandle(result));
       return result;
     }
 
@@ -447,35 +448,41 @@ namespace protobuf_for_node {
     map<const Descriptor*, Type*> types_;
     DynamicMessageFactory factory_;
 
-    static Handle<Value> GetType(const Local<String> name,
-                                 const AccessorInfo& args) {
-      Schema* schema = UnwrapThis<Schema>(args);
-      const Descriptor* descriptor =
-        schema->pool_->FindMessageTypeByName(*String::AsciiValue(name));
+    static NAN_PROPERTY_GETTER(GetType) {
+      NanScope();
 
-      return descriptor ?
-        schema->GetType(descriptor)->Constructor() :
-        Handle<Function>();
+      Schema *schema = Unwrap<Schema>(args.This());
+      const Descriptor* descriptor =
+        schema->pool_->FindMessageTypeByName(*String::Utf8Value(property));
+
+      if (descriptor != NULL) {
+        NanReturnValue(schema->GetType(descriptor)->Constructor());
+      }
+
+      NanReturnValue(Handle<Function>());
     }
 
-    static Handle<Value> NewSchema(const Arguments& args) {
-      if (!args.Length()) {
-        return (new Schema(args.This(),
-                           DescriptorPool::generated_pool()))->handle_;
+    static NAN_METHOD(NewSchema) {
+      NanScope();
+
+      Schema *schema;
+
+      if (args.Length() < 1) {
+        schema = new Schema(args.This(), DescriptorPool::generated_pool());
+        NanReturnValue(NanObjectWrapHandle(schema));
       }
 
-      if (!Buffer::HasInstance(args[0])) {
-        return ThrowException(Exception::TypeError(
-           String::New("Argument should be a buffer")));
+      if (!node::Buffer::HasInstance(args[0])) {
+        return NanThrowTypeError("Argument should be a buffer");
       }
+
       Local<Object> buffer_obj = args[0]->ToObject();
-      char *buffer_data = Buffer::Data(buffer_obj);
-      size_t buffer_length = Buffer::Length(buffer_obj);
+      char *buffer_data = node::Buffer::Data(buffer_obj);
+      size_t buffer_length = node::Buffer::Length(buffer_obj);
 
       FileDescriptorSet descriptors;
       if (!descriptors.ParseFromArray(buffer_data, buffer_length)) {
-        return v8::ThrowException(
-            v8::Exception::Error(String::New("Malformed descriptor")));
+        return NanThrowError("Malformed descriptor");
       }
 
       DescriptorPool* pool = new DescriptorPool;
@@ -483,7 +490,8 @@ namespace protobuf_for_node {
         pool->BuildFile(descriptors.file(i));
       }
 
-      return (new Schema(args.This(), pool))->handle_;
+      schema = new Schema(args.This(), pool);
+      NanReturnValue(NanObjectWrapHandle(schema));
     }
   };
 
@@ -534,7 +542,7 @@ namespace protobuf_for_node {
       handle_->SetInternalField(1, schema->handle_);
 
       Handle<Function> bind =
-        Script::Compile(String::New(
+        Script::Compile(NanNew<String>(
             "(function(m) {"
             "  var f = this;"
             "  return function(arg1, arg2) {"
@@ -544,7 +552,7 @@ namespace protobuf_for_node {
       for (int i = 0; i < descriptor->method_count(); i++) {
         const MethodDescriptor* method = descriptor->method(i);
         Handle<Value> arg = External::Wrap(const_cast<MethodDescriptor*>(method));
-        handle_->Set(String::New(method->name().c_str()),
+        handle_->Set(NanNew<String>(method->name().c_str()),
                      bind->Call(MethodTemplate->GetFunction(), 1, &arg));
       }
     }
@@ -660,7 +668,7 @@ namespace protobuf_for_node {
       }
 
       static void InvokeCallback(AsyncInvocation* self) {
-        HandleScope scope;
+        NanScope();
         Handle<Value> result = self->response_type_->ToJs(*(self->response_));
         self->cb_->Call(Context::GetCurrent()->Global(), 1, &result);
         delete self;
@@ -685,48 +693,58 @@ namespace protobuf_for_node {
   static void Init() {
     if (!TypeTemplate.IsEmpty()) return;
 
-    TypeTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New());
-    TypeTemplate->SetClassName(String::New("Type"));
+    Local<FunctionTemplate> t;
+
+    t = NanNew<FunctionTemplate>();
+    t->SetClassName(NanNew<String>("Type"));
     // native self
     // owning schema (so GC can manage our lifecyle)
     // constructor
     // toArray
-    TypeTemplate->InstanceTemplate()->SetInternalFieldCount(4);
+    t->InstanceTemplate()->SetInternalFieldCount(4);
+    NanAssignPersistent(TypeTemplate, t);
 
-    SchemaTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Schema::NewSchema));
-    SchemaTemplate->SetClassName(String::New("Schema"));
+    t = NanNew<FunctionTemplate>(Schema::NewSchema);
+    t->SetClassName(NanNew<String>("Schema"));
     // native self
     // array of types (so GC can manage our lifecyle)
-    SchemaTemplate->InstanceTemplate()->SetInternalFieldCount(2);
-    SchemaTemplate->InstanceTemplate()->SetNamedPropertyHandler(Schema::GetType);
+    t->InstanceTemplate()->SetInternalFieldCount(2);
+    t->InstanceTemplate()->SetNamedPropertyHandler(Schema::GetType);
+    NanAssignPersistent(SchemaTemplate, t);
 
-    ServiceSchemaTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New());
-    ServiceSchemaTemplate->SetClassName(String::New("Schema"));
+    t = NanNew<FunctionTemplate>();
+    t->SetClassName(NanNew<String>("Schema"));
     // native self
     // array of types (so GC can manage our lifecyle)
-    ServiceSchemaTemplate->InstanceTemplate()->SetInternalFieldCount(2);
-    ServiceSchemaTemplate->InstanceTemplate()->SetNamedPropertyHandler(Schema::GetType);
+    t->InstanceTemplate()->SetInternalFieldCount(2);
+    t->InstanceTemplate()->SetNamedPropertyHandler(Schema::GetType);
+    NanAssignPersistent(ServiceSchemaTemplate, t);
 
-    ServiceTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New());
-    ServiceTemplate->SetClassName(String::New("Service"));
-    ServiceTemplate->InstanceTemplate()->SetInternalFieldCount(2);
+    t = NanNew<FunctionTemplate>();
+    t->SetClassName(NanNew<String>("Service"));
+    t->InstanceTemplate()->SetInternalFieldCount(2);
+    NanAssignPersistent(ServiceTemplate, t);
 
     //MethodTemplate  = Persistent<FunctionTemplate>::New(FunctionTemplate::New(WrappedService::Invoke));
 
-    ParseTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Schema::Type::Parse));
-    SerializeTemplate = Persistent<FunctionTemplate>::New(FunctionTemplate::New(Schema::Type::Serialize));
+    t = NanNew<FunctionTemplate>(Schema::Type::Parse);
+    NanAssignPersistent(ParseTemplate, t);
+
+    t = NanNew<FunctionTemplate>(Schema::Type::Serialize);
+    NanAssignPersistent(SerializeTemplate, t);
 
     //WrappedService::Init();
   }
 
   Local<Function> SchemaConstructor() {
     Init();
-    return SchemaTemplate->GetFunction();
+    Local<FunctionTemplate> schemaTemplate = NanNew(SchemaTemplate);
+    return schemaTemplate->GetFunction();
   }
 
   void ExportService(Handle<Object> target, const char* name, Service* service) {
     Init();
-    //target->Set(String::New(name), (new WrappedService(service))->handle_);
+    //target->Set(NanNew<String>(name), (new WrappedService(service))->handle_);
   }
 
 }  // namespace protobuf_for_node
