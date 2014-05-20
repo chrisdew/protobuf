@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    puts = require('util').puts,
+    puts = console.log,
     read = require('fs').readFileSync,
     Schema = require('../').Schema;
 
