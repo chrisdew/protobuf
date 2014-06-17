@@ -1,2 +1,4 @@
-build
-.lock-wscript
+/build
+/.lock-wscript
+/node_modules
+/npm-debug.log
