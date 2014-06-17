@@ -1,3 +1,9 @@
+Node v0.11.13 Now Supported
+---------------------------
+
+Many thanks to [Mário Freitas/imkira](https://github.com/imkira) for his work.
+
+
 New Maintainer Required
 -----------------------
 
