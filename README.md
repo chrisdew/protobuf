@@ -4,16 +4,6 @@ Node v0.11.13 Now Supported
 Many thanks to [Mário Freitas/imkira](https://github.com/imkira) for his work.
 
 
-New Maintainer Required
------------------------
-
-Due to the amount of changes required to make protobuf work with Node v0.11.13+, and my increasing distaste for C++ (but not plain C, of course), I have decided to step down from maintaing this project (and all my other C++ npm modules).
-
-If someone would like to take over as maintainer of protobuf, please contact me.
-
-Many thanks to everyone who has provided bug reports and pull requests over the last couple of years.
-
-
 Protobuf
 --------
 
