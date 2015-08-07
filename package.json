@@ -17,6 +17,6 @@
     "test": "node test/unittest.js"
   },
   "dependencies": {
-    "nan": "~1.7.0"
+    "nan": "~1.9.0"
   }
 }
