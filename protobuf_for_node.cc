@@ -79,7 +79,7 @@ namespace protobuf_for_node {
 
   class Schema : public Nan::ObjectWrap {
   public:
-    Schema(Handle<Object> self, const DescriptorPool* pool)
+    Schema(Local<Object> self, const DescriptorPool* pool)
         : pool_(pool) {
       factory_.SetDelegateToGeneratedFactory(true);
       self->SetInternalField(1, Nan::New<Array>());
@@ -105,11 +105,11 @@ namespace protobuf_for_node {
         return handle->GetInternalField(2).As<Function>();
       }
 
-      Local<Object> NewObject(Handle<Value> properties) const {
+      Local<Object> NewObject(Local<Value> properties) const {
         return Constructor()->NewInstance(1, &properties);
       }
 
-      Type(Schema* schema, const Descriptor* descriptor, Handle<Object> self)
+      Type(Schema* schema, const Descriptor* descriptor, Local<Object> self)
         : schema_(schema), descriptor_(descriptor) {
         // Generate functions for bulk conversion between a JS object
         // and an array in descriptor order:
@@ -137,11 +137,11 @@ namespace protobuf_for_node {
         // managed type->schema link
         self->SetInternalField(1, schema_->handle());
 
-        Handle<Function> constructor =
+        Local<Function> constructor =
           Script::Compile(Nan::New<String>(from.str()).ToLocalChecked())->Run().As<Function>();
         constructor->SetHiddenValue(Nan::New<String>("type").ToLocalChecked(), self);
 
-        Handle<Function> bind =
+        Local<Function> bind =
           Script::Compile(Nan::New<String>(
               "(function(self) {"
               "  var f = this;"
@@ -149,7 +149,7 @@ namespace protobuf_for_node {
               "    return f.call(self, arg);"
               "  };"
               "})").ToLocalChecked())->Run().As<Function>();
-        Handle<Value> arg = self;
+        Local<Value> arg = self;
 
         Local<FunctionTemplate> parseTemplate = Nan::New(ParseTemplate);
         Local<FunctionTemplate> serializeTemplate = Nan::New(SerializeTemplate);
@@ -167,7 +167,7 @@ namespace protobuf_for_node {
        reflection->GetRepeated##TYPE(instance, field, index) :           \
        reflection->Get##TYPE(instance, field))
 
-      static Handle<Value> ToJs(const Message& instance,
+      static Local<Value> ToJs(const Message& instance,
                                 const Reflection* reflection,
                                 const FieldDescriptor* field,
                                 const Type* message_type,
@@ -233,10 +233,10 @@ namespace protobuf_for_node {
             (field->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE) ?
             schema_->GetType(field->message_type()) : NULL;
 
-          Handle<Value> value;
+          Local<Value> value;
           if (field->is_repeated()) {
             int size = reflection->FieldSize(instance, field);
-            Handle<Array> array = Nan::New<Array>(size);
+            Local<Array> array = Nan::New<Array>(size);
             for (int j = 0; j < size; j++) {
               array->Set(j, ToJs(instance, reflection, field, child_type, j));
             }
@@ -278,7 +278,7 @@ namespace protobuf_for_node {
 
       static const char* ToProto(Message* instance,
                                  const FieldDescriptor* field,
-                                 Handle<Value> value,
+                                 Local<Value> value,
                                  const Type* type,
                                  bool repeated) {
         Nan::HandleScope scope;
@@ -354,14 +354,14 @@ namespace protobuf_for_node {
       }
 #undef SET
 
-      const char* ToProto(Message* instance, Handle<Object> src) const {
+      const char* ToProto(Message* instance, Local<Object> src) const {
         Local<Object> handle = const_cast<Type *>(this)->handle();
-        Handle<Function> to_array = handle->GetInternalField(3).As<Function>();
-        Handle<Array> properties = to_array->Call(src, 0, NULL).As<Array>();
+        Local<Function> to_array = handle->GetInternalField(3).As<Function>();
+        Local<Array> properties = to_array->Call(src, 0, NULL).As<Array>();
 
         const char* error = NULL;
         for (int i = 0; !error && i < descriptor_->field_count(); i++) {
-          Handle<Value> value = properties->Get(i);
+          Local<Value> value = properties->Get(i);
           if (value->IsUndefined() ||
               value->IsNull()) continue;
 
@@ -375,7 +375,7 @@ namespace protobuf_for_node {
               continue;
             }
 
-            Handle<Array> array = value.As<Array>();
+            Local<Array> array = value.As<Array>();
             int length = array->Length();
 
             for (int j = 0; !error && j < length; j++) {
@@ -432,7 +432,7 @@ namespace protobuf_for_node {
       // managed schema->[type] link
       //
       Local<Object> handle = const_cast<Schema *>(this)->handle();
-      Handle<Array> types = handle->GetInternalField(1).As<Array>();
+      Local<Array> types = handle->GetInternalField(1).As<Array>();
       types->Set(types->Length(), result->handle());
       return result;
     }
@@ -733,7 +733,7 @@ namespace protobuf_for_node {
     return schemaTemplate->GetFunction();
   }
 
-  void ExportService(Handle<Object> target, const char* name, Service* service) {
+  void ExportService(Local<Object> target, const char* name, Service* service) {
     Init();
     //target->Set(Nan::New<String>(name), (new WrappedService(service))->handle_).ToLocalChecked();
   }
