@@ -7,7 +7,7 @@
   },
   "main": "./build/Release/protobuf_for_node",
   "engines": {
-    "node": ">= 0.8.0 < 0.12"
+    "node": ">= 0.8.0"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,6 @@
     "test": "node test/unittest.js"
   },
   "dependencies": {
-    "nan": "~1.0.0"
+    "nan": "~2.1.0"
   }
 }
