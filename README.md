@@ -1,7 +1,8 @@
-Node v0.11.13 Now Supported
+Node v4.x.x/5.x.x Now Supported
 ---------------------------
 
 Many thanks to [Mário Freitas/imkira](https://github.com/imkira) for his work.
+Currently maintained by [Anton Antonov/syndbg](https://github.com/syndbg).
 
 
 Protobuf
@@ -9,7 +10,12 @@ Protobuf
 
 This is a fork of http://code.google.com/p/protobuf-for-node/
 
-It now works with the NodeJS 0.8.x and 0.10.x series.
+Works/worked with NodeJS versions:
+
+* 0.8.x,
+* 0.10.x,
+* 4.x.x,
+* 5.x.x
 
 To install, just type:
 
