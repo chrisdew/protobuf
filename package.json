@@ -1,6 +1,6 @@
 {
   "name": "protobuf",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "Protocol Buffers for NodeJS",
   "author": {
     "Matthias Ernst": "mernst@google.com"
