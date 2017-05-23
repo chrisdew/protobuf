@@ -2,6 +2,7 @@ Node v6.x.x/7.x.x Now Supported
 ---------------------------
 
 Many thanks to [Mário Freitas/imkira](https://github.com/imkira) for his work.
+Thanks to work by [Nikolai Vavilov/seishun](https://github.com/seishun), package uses `node-gyp``, a bundled protobuf lib and compiles on Windows.
 Currently maintained by [Anton Antonov/syndbg](https://github.com/syndbg).
 
 
@@ -19,11 +20,19 @@ Works/worked with NodeJS versions:
 * 6.x.x,
 * 7.x.x
 
-To install, just type:
+To install:
 
-    npm install protobuf
+```bash
+# NPM version (may be slightly out-dated, but surely stable)
+> npm install protobuf
+# 0.8.x/0.10.x support version
+> npm install https://github.com/chrisdew/protobuf.git#c4622aa2b954d43902a1444a5bf99957ac5d10c1
+# 4.x.x/5.x.x support version
+> npm install https://github.com/chrisdew/protobuf.git#399f22901dadecc8132aa86cc638c7a379bc61b2
+# 6.x.x/7.x.x support version
+> npm install https://github.com/chrisdew/protobuf.git#235983e4a991e2b25dfce26b4180a84edd2a925e
+```
 
-Thanks to work by seishun, it now uses node-gyp and has google's protocol bufferes library integrated, so no separate installtion required.
 
 All the best,
 
