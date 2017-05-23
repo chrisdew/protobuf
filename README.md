@@ -1,4 +1,4 @@
-Node v4.x.x/5.x.x Now Supported
+Node v6.x.x/7.x.x Now Supported
 ---------------------------
 
 Many thanks to [Mário Freitas/imkira](https://github.com/imkira) for his work.
@@ -15,7 +15,9 @@ Works/worked with NodeJS versions:
 * 0.8.x,
 * 0.10.x,
 * 4.x.x,
-* 5.x.x
+* 5.x.x,
+* 6.x.x,
+* 7.x.x
 
 To install, just type:
 

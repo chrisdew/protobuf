@@ -106,7 +106,7 @@ namespace protobuf_for_node {
       }
 
       Local<Object> NewObject(Local<Value> properties) const {
-        return Constructor()->NewInstance(1, &properties);
+        return Nan::NewInstance(Constructor(), 1, &properties).ToLocalChecked();
       }
 
       Type(Schema* schema, const Descriptor* descriptor, Local<Object> self)
@@ -139,7 +139,7 @@ namespace protobuf_for_node {
 
         Local<Function> constructor =
           Script::Compile(Nan::New<String>(from.str()).ToLocalChecked())->Run().As<Function>();
-        constructor->SetHiddenValue(Nan::New<String>("type").ToLocalChecked(), self);
+        Nan::SetPrivate(constructor, Nan::New<String>("type").ToLocalChecked(), self);
 
         Local<Function> bind =
           Script::Compile(Nan::New<String>(
@@ -427,7 +427,7 @@ namespace protobuf_for_node {
 
       Local<FunctionTemplate> typeTemplate = Nan::New(TypeTemplate);
       result = types_[descriptor] =
-        new Type(this, descriptor, typeTemplate->GetFunction()->NewInstance());
+        new Type(this, descriptor, Nan::NewInstance(typeTemplate->GetFunction()).ToLocalChecked());
 
       // managed schema->[type] link
       //
