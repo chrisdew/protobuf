@@ -17,6 +17,11 @@
 #include <google/protobuf/stubs/common.h>
 
 namespace protobuf_for_node {
+  const int64_t MAX_SAFE_INTEGER = 9007199254740991;
+  const int64_t MIN_SAFE_INTEGER = -9007199254740991;
+  const uint64_t MAX_SAFE_UNSIGNED_INTEGER = 9007199254740991;
+  const uint64_t MIN_SAFE_UNSIGNED_INTEGER = 0;
+
   v8::Local<v8::Function> SchemaConstructor();
 
   // Exports a JS object under "name" in "target" which forwards method calls to
