@@ -590,7 +590,7 @@ bool Tokenizer::ParseInteger(const string& text, uint64 max_value,
     GOOGLE_LOG_IF(DFATAL, digit < 0 || digit >= base)
       << " Tokenizer::ParseInteger() passed text that could not have been"
          " tokenized as an integer: " << CEscape(text);
-    if (digit > max_value || result > (max_value - digit) / base) {
+    if ((uint64)digit > max_value || result > (max_value - (uint64)digit) / base) {
       // Overflow.
       return false;
     }
@@ -620,7 +620,8 @@ double Tokenizer::ParseFloat(const string& text) {
     ++end;
   }
 
-  GOOGLE_LOG_IF(DFATAL, end - start != text.size() || *start == '-')
+  GOOGLE_LOG_IF(DFATAL, ((end < start) ||
+        (size_t)(end - start) != text.size()) || (*start == '-'))
     << " Tokenizer::ParseFloat() passed text that could not have been"
        " tokenized as a float: " << CEscape(text);
   return result;

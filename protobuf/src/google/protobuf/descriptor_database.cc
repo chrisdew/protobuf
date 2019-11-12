@@ -234,7 +234,9 @@ bool SimpleDescriptorDatabase::DescriptorIndex<Value>::IsSubSymbol(
 template <typename Value>
 bool SimpleDescriptorDatabase::DescriptorIndex<Value>::ValidateSymbolName(
     const string& name) {
-  for (int i = 0; i < name.size(); i++) {
+  size_t length = name.size();
+
+  for (size_t i = 0; i < length; i++) {
     // I don't trust ctype.h due to locales.  :(
     if (name[i] != '.' && name[i] != '_' &&
         (name[i] < '0' || name[i] > '9') &&
@@ -300,7 +302,9 @@ bool SimpleDescriptorDatabase::MaybeCopy(const FileDescriptorProto* file,
 
 EncodedDescriptorDatabase::EncodedDescriptorDatabase() {}
 EncodedDescriptorDatabase::~EncodedDescriptorDatabase() {
-  for (int i = 0; i < files_to_delete_.size(); i++) {
+  size_t length = files_to_delete_.size();
+
+  for (size_t i = 0; i < length; i++) {
     operator delete(files_to_delete_[i]);
   }
 }
@@ -438,7 +442,9 @@ bool DescriptorPoolDatabase::FindAllExtensionNumbers(
   vector<const FieldDescriptor*> extensions;
   pool_.FindAllExtensions(extendee, &extensions);
 
-  for (int i = 0; i < extensions.size(); ++i) {
+  size_t length = extensions.size();
+
+  for (size_t i = 0; i < length; ++i) {
     output->push_back(extensions[i]->number());
   }
 
@@ -461,7 +467,9 @@ MergedDescriptorDatabase::~MergedDescriptorDatabase() {}
 bool MergedDescriptorDatabase::FindFileByName(
     const string& filename,
     FileDescriptorProto* output) {
-  for (int i = 0; i < sources_.size(); i++) {
+  size_t length = sources_.size();
+
+  for (size_t i = 0; i < length; i++) {
     if (sources_[i]->FindFileByName(filename, output)) {
       return true;
     }
@@ -472,14 +480,16 @@ bool MergedDescriptorDatabase::FindFileByName(
 bool MergedDescriptorDatabase::FindFileContainingSymbol(
     const string& symbol_name,
     FileDescriptorProto* output) {
-  for (int i = 0; i < sources_.size(); i++) {
+  size_t length = sources_.size();
+
+  for (size_t i = 0; i < length; i++) {
     if (sources_[i]->FindFileContainingSymbol(symbol_name, output)) {
       // The symbol was found in source i.  However, if one of the previous
       // sources defines a file with the same name (which presumably doesn't
       // contain the symbol, since it wasn't found in that source), then we
       // must hide it from the caller.
       FileDescriptorProto temp;
-      for (int j = 0; j < i; j++) {
+      for (size_t j = 0; j < i; j++) {
         if (sources_[j]->FindFileByName(output->name(), &temp)) {
           // Found conflicting file in a previous source.
           return false;
@@ -495,7 +505,9 @@ bool MergedDescriptorDatabase::FindFileContainingExtension(
     const string& containing_type,
     int field_number,
     FileDescriptorProto* output) {
-  for (int i = 0; i < sources_.size(); i++) {
+  size_t length = sources_.size();
+
+  for (size_t i = 0; i < length; i++) {
     if (sources_[i]->FindFileContainingExtension(
           containing_type, field_number, output)) {
       // The symbol was found in source i.  However, if one of the previous
@@ -503,7 +515,7 @@ bool MergedDescriptorDatabase::FindFileContainingExtension(
       // contain the symbol, since it wasn't found in that source), then we
       // must hide it from the caller.
       FileDescriptorProto temp;
-      for (int j = 0; j < i; j++) {
+      for (size_t j = 0; j < i; j++) {
         if (sources_[j]->FindFileByName(output->name(), &temp)) {
           // Found conflicting file in a previous source.
           return false;
@@ -521,8 +533,9 @@ bool MergedDescriptorDatabase::FindAllExtensionNumbers(
   set<int> merged_results;
   vector<int> results;
   bool success = false;
+  size_t length = sources_.size();
 
-  for (int i = 0; i < sources_.size(); i++) {
+  for (size_t i = 0; i < length; i++) {
     if (sources_[i]->FindAllExtensionNumbers(extendee_type, &results)) {
       copy(results.begin(), results.end(),
            insert_iterator<set<int> >(merged_results, merged_results.begin()));

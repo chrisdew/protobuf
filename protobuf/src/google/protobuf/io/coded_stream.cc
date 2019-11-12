@@ -257,7 +257,7 @@ bool CodedInputStream::ReadLittleEndian32Fallback(uint32* value) {
   uint8 bytes[sizeof(*value)];
 
   const uint8* ptr;
-  if (BufferSize() >= sizeof(*value)) {
+  if (BufferSize() >= (int)sizeof(*value)) {
     // Fast path:  Enough bytes in the buffer to read directly.
     ptr = buffer_;
     Advance(sizeof(*value));
@@ -274,7 +274,7 @@ bool CodedInputStream::ReadLittleEndian64Fallback(uint64* value) {
   uint8 bytes[sizeof(*value)];
 
   const uint8* ptr;
-  if (BufferSize() >= sizeof(*value)) {
+  if (BufferSize() >= (int)sizeof(*value)) {
     // Fast path:  Enough bytes in the buffer to read directly.
     ptr = buffer_;
     Advance(sizeof(*value));
@@ -452,7 +452,7 @@ bool CodedInputStream::ReadVarint64Fallback(uint64* value) {
 
     // We have overrun the maximum size of a varint (10 bytes).  The data
     // must be corrupt.
-    return NULL;
+    return false;
 
    done:
     Advance(ptr - buffer_);
@@ -594,7 +594,7 @@ uint8* CodedOutputStream::WriteRawToArray(
 void CodedOutputStream::WriteLittleEndian32(uint32 value) {
   uint8 bytes[sizeof(value)];
 
-  bool use_fast = buffer_size_ >= sizeof(value);
+  bool use_fast = buffer_size_ >= (int)sizeof(value);
   uint8* ptr = use_fast ? buffer_ : bytes;
 
   WriteLittleEndian32ToArray(value, ptr);
@@ -609,7 +609,7 @@ void CodedOutputStream::WriteLittleEndian32(uint32 value) {
 void CodedOutputStream::WriteLittleEndian64(uint64 value) {
   uint8 bytes[sizeof(value)];
 
-  bool use_fast = buffer_size_ >= sizeof(value);
+  bool use_fast = buffer_size_ >= (int)sizeof(value);
   uint8* ptr = use_fast ? buffer_ : bytes;
 
   WriteLittleEndian64ToArray(value, ptr);
