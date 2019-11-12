@@ -17,10 +17,10 @@ var puts = require('util').puts;
 
 // The "Schema" constructor lets you load a protocol schema definition
 // (a compiled .proto file).
-var Schema = require('protobuf_for_node').Schema;
+var Schema = require('protobuf').Schema;
 
 // "schema" contains all message types defined in feeds.proto|desc.
-var schema = new Schema(fs.readFileSync('example/feeds.desc'));
+var schema = new Schema(fs.readFileSync('feeds.desc'));
 // The "Feed" message.
 var Feed = schema['feeds.Feed'];
 
